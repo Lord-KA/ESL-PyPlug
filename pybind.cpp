@@ -1,4 +1,3 @@
-#include <cinttypes>
 #include <cstddef>
 #include <pybind11/stl.h>
 #include <pybind11/pybind11.h>
@@ -6,6 +5,7 @@
 
 #include <iostream>
 #include <string>
+#include <stdio.h>
 
 #include "tools.hpp"
 
@@ -13,27 +13,27 @@
 
 namespace py = pybind11;
 
-class PyProxyImage {
+class PyProxyImage : public booba::Image {
 public:
     PyProxyImage(booba::Image *image) : image(image) {}
     PyProxyImage(std::initializer_list<booba::Image*> list) : image(*list.begin()) {}
 
-    size_t getH()
+    virtual size_t getH() override
     {
         return image->getH();
     }
 
-    size_t getW()
+    virtual size_t getW() override
     {
         return image->getW();
     }
 
-    uint32_t getPixel(size_t x, size_t y)
+    virtual uint32_t getPixel(size_t x, size_t y) override
     {
         return image->getPixel(x, y);
     }
 
-    void setPixel(size_t x, size_t y, uint32_t color)
+    virtual void setPixel(size_t x, size_t y, uint32_t color) override
     {
         return image->setPixel(x, y, color);
     }
@@ -48,16 +48,17 @@ public:
 
     virtual void apply(booba::Image* image, const booba::Event* event)
     {
-        std::cerr << "apply called!\n";
-        PyProxyImage proxy(image);
-        pyTool.attr("apply")(proxy);
+        PyProxyImage proxy = new PyProxyImage(image);
+        fprintf(stderr, "apply was called with img: %p\n", image);
+        if (image && event)
+            pyTool.attr("apply")(proxy); //TODO events
     }
 
     virtual const char* getTexture()
     {
         py::object res = pyTool.attr("get_texture")();
         py::print(res);
-        //XXX return res.cast<char*>();
+        return "some_texture.png";
     }
 
     virtual void buildSetupWidget()
@@ -70,44 +71,28 @@ private:
     py::object pyTool;
 };
 
-PyProxyTool *proxy_tool = NULL;
-
-void booba::addTool(Tool *tool)
-{
-    std::cerr << "addTool() called!\n";
-}
-
 PYBIND11_EMBEDDED_MODULE(pyplug, m)
 {       // `m` is a `py::module_` which is used to bind functions and classes
-    m.def("set_toolbar_size", [](size_t w, size_t h) {
-        std::cout << "set_toolbar_size() called with w = " << w << "; h = " << h << std::endl; //XXX
-    });
+    m.def("set_toolbar_size", &booba::setToolBarSize);
 
     m.def("add_tool", [](py::object &pyTool) {
         PyProxyTool *proxy = new PyProxyTool(pyTool);
         booba::addTool(proxy);
-        proxy_tool = proxy;
+        std::cout << "add_tool() called!\n"; //XXX
     });
 
     py::class_<PyProxyImage>(m, "PyProxyImage")
         .def(py::init<>())
         .def("getH", &PyProxyImage::getH)
         .def("getW", &PyProxyImage::getW)
-        .def("getPixel", &PyProxyImage::getPixel)
-        .def("setPixel", &PyProxyImage::setPixel);
+        .def("get_pixel", &PyProxyImage::getPixel)
+        .def("set_pixel", &PyProxyImage::setPixel);
 }
 
-int main()
+void booba::init_module()
 {
-    py::scoped_interpreter guard{};
+    py::initialize_interpreter();
 
-    py::print("Hello world!");
-
-    py::module_ tools = py::module_::import("tools");
-    py::object res = tools.attr("init_modules")();
-
-    DummyImage dummyImage;
-    assert(proxy_tool);
-    proxy_tool->apply(&dummyImage, NULL);
-    py::print("finished!");
+    py::module_ plug = py::module_::import("my_plugin");
+    py::object res = plug.attr("init_modules")();
 }

@@ -6,9 +6,9 @@
  * @brief Basic plugin header.
  * @version 0.1.0a
  * @date 2022-11-09
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #include <cstdint>
@@ -21,7 +21,7 @@ namespace booba { // boot of outstanding best api
 
     /**
      * @brief GUID - global identifier of your plugin.
-     * 
+     *
      * @attention We use 4 version of GUID specified at @link http://www.rfc-editor.org/rfc/rfc4122 @endlink in it's string represenation.
      * @warning Null-terminated.
      * @warning GUID with all zero bytes reffers to core application.
@@ -39,8 +39,8 @@ namespace booba { // boot of outstanding best api
 
 
     /**
-     * @brief Returns GUID of this plugin. 
-     * 
+     * @brief Returns GUID of this plugin.
+     *
      * @return GUID of your plugin, which allows other plugins to use your symbols.
      */
     extern "C" GUID getGUID();
@@ -74,13 +74,13 @@ namespace booba { // boot of outstanding best api
         /**
          * @brief Relative to previous mouse position.
          */
-        int64_t rel_x, rel_y; 
+        int64_t rel_x, rel_y;
     };
 
     struct MouseButtonEventData
     {
         size_t x, y;
-        MouseButton button; 
+        MouseButton button;
         /**
          * @brief If corresponding keys was pressed.
          */
@@ -92,7 +92,7 @@ namespace booba { // boot of outstanding best api
         /**
          * @brief Id of button.
          */
-        uint64_t id; 
+        uint64_t id;
     };
 
     struct SliderMovedEventData
@@ -100,7 +100,7 @@ namespace booba { // boot of outstanding best api
         /**
          * @brief Id of slider.
          */
-        uint64_t id; 
+        uint64_t id;
         int64_t value;
     };
 
@@ -111,7 +111,7 @@ namespace booba { // boot of outstanding best api
          * @brief Id of Canvas.
          */
         uint64_t id;
-        size_t x, y; 
+        size_t x, y;
     };
 
     struct TimerEventData
@@ -123,13 +123,13 @@ namespace booba { // boot of outstanding best api
     };
 
     /**
-     * @brief booba::Event is used to transmit event inside plugin. 
+     * @brief booba::Event is used to transmit event inside plugin.
      */
     class Event
     {
     public:
         EventType type;
-        union 
+        union
         {
             MotionEventData motion;
             MouseButtonEventData mbedata;
@@ -146,21 +146,21 @@ namespace booba { // boot of outstanding best api
     public:
         /**
          * @brief Get height of image
-         * 
+         *
          * @return size_t - height of image.
          */
         virtual size_t getH()     = 0;
 
         /**
          * @brief Get width of image
-         * 
+         *
          * @return size_t - width of image
          */
         virtual size_t getW()     = 0;
 
         /**
          * @brief Get the Pixel object
-         * 
+         *
          * @param x - x coord. Must be less than width
          * @param y - y coord. Must be less than height
          * @return uint32_t - color of pixel
@@ -169,20 +169,17 @@ namespace booba { // boot of outstanding best api
 
         /**
          * @brief Sets pixel on image.
-         * 
+         *
          * @param x - x coord. Must be less than width
          * @param y - y coord. Must be less than height
          * @param color - color of new pixel.
          */
-        virtual void setPixel(size_t x, size_t y, uint32_t color) = 0;     
-        
-    protected:
-        ~Image() {}
+        virtual void setPixel(size_t x, size_t y, uint32_t color) = 0;
     };
 
     /**
      * @brief Drawing context.
-     * 
+     *
      */
     struct ApplicationContext
     {
@@ -201,24 +198,24 @@ namespace booba { // boot of outstanding best api
     public:
         /**
          * @brief This function will be called on every event happens.
-         * 
-         * @param image - Image to apply tool / filter. Can be nullptr. You shouldn't expect it to be valid after return 
+         *
+         * @param image - Image to apply tool / filter. Can be nullptr. You shouldn't expect it to be valid after return
          * @param event - Event to proceed. Not nullptr.
          */
         virtual void apply(Image* image, const Event* event) = 0;
 
         /**
          * @brief Destroy the Tool object
-         * 
+         *
          */
         virtual ~Tool() {}
 
         /**
-         * @brief Get the texture to draw. 
-         * 
+         * @brief Get the texture to draw.
+         *
          * @return const char* - rel path to texture.
          */
-        virtual const char* getTexture() = 0; 
+        virtual const char* getTexture() = 0;
 
         /**
          * @brief Build widget on toolbar by using createButoon/createLabel/createSlider/createCanvas
@@ -226,7 +223,7 @@ namespace booba { // boot of outstanding best api
          */
         virtual void buildSetupWidget() = 0;
     };
-    
+
     /**
      * @brief Function request toolBar width given size.
      * This function is called in buildSetupWidget() only before any creation of widgets.
@@ -235,8 +232,8 @@ namespace booba { // boot of outstanding best api
      * @return if creation was successfull.
      */
     extern "C" bool setToolBarSize(size_t w, size_t h);
-    
-    // This functions are implemented by GUI lib. 
+
+    // This functions are implemented by GUI lib.
     // Core application MUST fit all next widgets is specified rects.
     /**
      * @brief Creates button on some given toolbar.
@@ -250,7 +247,7 @@ namespace booba { // boot of outstanding best api
      * @return unique identifier. 0 if unsuccess.
      */
     extern "C" uint64_t createButton   (size_t x, size_t y, size_t w, size_t h, const char* text);
-    
+
     /**
      * @brief Creates label on some given toolbar.
      * This function can only be called during buildSetupWidget();
@@ -262,7 +259,7 @@ namespace booba { // boot of outstanding best api
      * @return unique identifier. 0 if unsuccess.
      */
     extern "C" uint64_t createLabel    (size_t x, size_t y, size_t w, size_t h, const char* text);
-    
+
     /**
      * @brief Creates slider on some given toolbar.
      * This function can only be called during buildSetupWidget();
@@ -276,7 +273,7 @@ namespace booba { // boot of outstanding best api
      * @return unique identifier. 0 if unsuccess.
      */
     extern "C" uint64_t createSlider(size_t x, size_t y, size_t w, size_t h, int64_t minValue, int64_t maxValue, int64_t startValue);
-    
+
     /**
      * @brief Creates canvas on some given toolbar.
      * This function can only be called during buildSetupWidget();
@@ -287,7 +284,7 @@ namespace booba { // boot of outstanding best api
      * @return unique identifier. 0 if unsuccess.
      */
     extern "C" uint64_t createCanvas(size_t x, size_t y, size_t w, size_t h);
-    
+
     /**
      * @brief Puts pixel to canvas with given id
      * @param canvas - id of canvas, returned by createCanvas
@@ -296,26 +293,26 @@ namespace booba { // boot of outstanding best api
      * @param color - color of pixel.
      */
     extern "C" void putPixel (uint64_t canvas, size_t x, size_t y, uint32_t color);
-    
+
     /**
      * @brief Blits image to canvas
      * @param canvas - id of canvas, returned by createCanvas
      * @param x - x coordinate of sprite.
-     * @param y - y coordinate of sprite.  
+     * @param y - y coordinate of sprite.
      * @param w - width of image.
      * @param h - height of image.
      * @param texture - rel path to image.
-     * 
+     *
      */
     extern "C" void putSprite(uint64_t canvas, size_t x, size_t y, size_t w, size_t h, const char* texture);
-    
+
      /**
      * @brief Cleans canvas with given id.
      * @param canvasId - id of canvas
      * @param color to clear.
      */
     extern "C" void cleanCanvas(uint64_t canvasId, uint32_t color);
-    
+
     /**
      * @brief Adds tool to application.
      * @param tool - tool pointer. App will delete it on exit itself.
@@ -331,7 +328,7 @@ namespace booba { // boot of outstanding best api
 
 
     /**
-     * @brief Attempts to get symbol with name from plugin with given guid. 
+     * @brief Attempts to get symbol with name from plugin with given guid.
      * @param guid - GUID of plugin to take symbol.
      * @param name of symbol to perform lookup.
      * @return The address where that symbol is loaded into
