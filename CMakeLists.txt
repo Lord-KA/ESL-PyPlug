@@ -38,7 +38,7 @@ if(NOT commonTools_POPULATED)
 endif()
 
 # Define sources and executable
-add_executable(test pybind-test.cpp)
+add_executable(standalone-pyplug ./standalone-pyplug.cpp)
 
 FetchContent_Declare(
   pybind11
@@ -52,4 +52,7 @@ if(NOT pybind11_POPULATED)
   add_subdirectory(./build/_deps/pybind11-src)
 endif()
 
-target_link_libraries(test pybind11::embed)
+target_link_libraries(standalone-pyplug pybind11::embed)
+
+add_library(pyplug SHARED pyplug.cpp)
+target_link_libraries(pyplug pybind11::embed)
