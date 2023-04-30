@@ -34,7 +34,8 @@ FetchContent_Declare(
 FetchContent_GetProperties(commonTools)
 if(NOT commonTools_POPULATED)
   FetchContent_Populate(commonTools)
-  include_directories(./build/_deps/commontools-src)
+  #XXX temporary don't include ESL standard, because it is not updated yet
+  # include_directories(./build/_deps/commontools-src)
 endif()
 
 # Define sources and executable

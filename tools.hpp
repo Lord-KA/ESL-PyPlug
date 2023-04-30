@@ -16,6 +16,8 @@
 #include "optionals.hpp"
 #endif /* ELPIDIFOR_STANDART_EXTENDED */
 #include <cstddef>
+#include <algorithm>
+#include <cassert>
 
 namespace booba { // boot of outstanding best api
 
@@ -53,7 +55,7 @@ namespace booba { // boot of outstanding best api
         MouseReleased  = 3, // Mouse released on image. Data structure: MouseButtonEventData
 
         ButtonClicked   = 4, // Button on toolbar was clicked. Data structure: ButtonClickedEventData.
-        SliderMoved  = 5, // Slider on toolbar was moved. Data structure: SliderMovedEventData.
+        SliderMoved     = 5, // Slider on toolbar was moved. Data structure: SliderMovedEventData.
         CanvasMPressed  = 6, // Same as MousePressed, but on canvas. Data structure - CanvasEventData.
         CanvasMReleased = 7, // Same as MouseReleased, but on canvas. Data structure - CanvasEventData.
         CanvasMMoved    = 8, // Same as MouseMoved, but on canvas. Data structure - CanvasEventData.
@@ -140,6 +142,7 @@ namespace booba { // boot of outstanding best api
         } Oleg; //Object loading event group.
     };
 
+    class Picture;
 
     class Image
     {
@@ -175,7 +178,167 @@ namespace booba { // boot of outstanding best api
          * @param color - color of new pixel.
          */
         virtual void setPixel(size_t x, size_t y, uint32_t color) = 0;
+
+        /**
+         * @brief Get picture - a rectangular pixel array.
+         *
+         * @note the rectangular must be in the images boundaries.
+         *
+         * @param x - x coord of left down corner
+         * @param y - y coord of left down corner
+         * @param h - height of the rectangular
+         * @param w - width of the rectangular
+         */
+        virtual Picture getPicture(size_t x, size_t y, size_t h, size_t w) = 0;
+
+        /**
+         * @brief Set picture - a rectangular pixel array.
+         *
+         * @note the rectangular must be in the images boundaries.
+         *
+         * @param pic - the picture to set, move-only
+         */
+        virtual void setPicture(Picture &&pic) = 0;
+
+    protected:
+        ~Image() {}
     };
+
+    /**
+     * @brief Picture is an owning pixel array that copies rectangular picture
+     *        from image on construction. It is move-only to stop unintentional
+     *        copy.
+     */
+    class Picture {
+    public:
+        Picture(size_t x, size_t y, size_t w, size_t h, uint32_t *image, size_t image_w, size_t image_h)
+            : x(x), y(y), w(w), h(h)
+        {
+            assert(x + w <= image_w and y + h <= image_h);
+
+            size_t size = w * h;
+            data = new uint32_t[size];
+            for (size_t i = 0; i < h; ++i)
+                std::copy(image + (i + y) * image_w + x,
+                          image + (i + y) * image_w + x + w,
+                          data + i * w);
+
+        }
+
+        Picture(size_t x, size_t y, size_t w, size_t h, Image *image)
+            : x(x), y(y), w(w), h(h)
+        {
+            size_t image_w = image->getW();
+            size_t image_h = image->getH();
+            assert(x + w <= image_w and y + h <= image_h);
+
+            size_t size = w * h;
+            data = new uint32_t[size];
+            for (size_t i = 0; i < w; ++i)
+                for (size_t j = 0; j < h; ++j)
+                    data[j * w + i] = image->getPixel(i + x, j + y);
+        }
+
+
+        Picture(const Picture &other) = delete;
+
+        Picture(Picture &&other)
+            : x(other.x), y(other.y), w(other.w), h(other.h), data(other.data)
+        {
+            other.x = other.y = -1;
+            other.w = other.h = -1;
+            other.data = nullptr;
+        }
+
+        void operator=(const Picture &other) = delete;
+
+        void operator=(Picture &&other)
+        {
+            if (data != nullptr)
+                delete[] data;
+
+            data = other.data;
+            x = other.x;
+            y = other.y;
+            w = other.w;
+            h = other.h;
+
+            other.x = other.y = -1;
+            other.w = other.h = -1;
+            other.data = nullptr;
+        }
+
+        ~Picture()
+        {
+            if (data != nullptr)
+                delete[] data;
+
+            x = y = -1;
+            w = h = -1;
+            data = nullptr;
+        }
+
+        uint32_t& operator()(size_t x, size_t y)
+        {
+            assert(x < w and y < h);
+            return data[y * w + x];
+        }
+
+        const uint32_t& operator()(size_t x, size_t y) const
+        {
+            assert(x < w and y < h);
+            return data[y * w + x];
+        }
+
+        void reshape(size_t new_x, size_t new_y, size_t new_w, size_t new_h)
+        {
+            if (new_x == -1)
+                new_x = x;
+            if (new_y == -1)
+                new_y = y;
+            if (new_w == -1)
+                new_w = w;
+            if (new_h == -1)
+                new_h = h;
+
+            assert(new_w * new_h == w * h);
+            x = new_x;
+            y = new_y;
+            w = new_w;
+            h = new_h;
+        }
+
+        uint32_t* getData() const
+        {
+            return data;
+        }
+
+        size_t getH() const
+        {
+            return h;
+        }
+
+        size_t getW() const
+        {
+            return w;
+        }
+
+        size_t getX() const
+        {
+            return x;
+        }
+
+        size_t getY() const
+        {
+            return y;
+        }
+
+    private:
+        size_t x, y;
+        size_t w, h;
+        uint32_t *data = nullptr;
+    };
+
 
     /**
      * @brief Drawing context.
