@@ -73,12 +73,12 @@ class TestingImage : public booba::Image {
 public:
     virtual size_t getH() override
     {
-        return 179;
+        return 10;
     }
 
     virtual size_t getW() override
     {
-        return 234;
+        return 20;
     }
 
     virtual uint32_t getPixel(size_t x, size_t y) override
@@ -98,7 +98,8 @@ public:
 
     virtual void setPicture(booba::Picture &&pic) override
     {
-        assert(!"Not implemented yet!");
+        std::cerr << "pic(2, 5) = " << pic(2, 5) << "\n";
+        assert(pic(2, 5) == 179);
     }
 };
 
@@ -147,6 +148,7 @@ int main()
 
     tools[0]->apply(&image, &event);
 
+    tools[2]->apply(&image, &event);
 
     std::cerr << "Finished testing!\n";
 }

@@ -3,11 +3,13 @@
 #include <pybind11/stl.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
+#include <pybind11/numpy.h>
 
 #include <iostream>
-#include <python3.10/pyport.h>
 #include <string>
+#include <sys/types.h>
 #include <utility>
+#include <vector>
 
 #include "tools.hpp"
 
@@ -15,39 +17,47 @@ namespace py = pybind11;
 
 namespace detail {
 
-class PyProxyImage : public booba::Image {
+class PyProxyImage {
 public:
     PyProxyImage(booba::Image *image) : image(image) {}
     PyProxyImage(std::initializer_list<booba::Image*> list) : image(*list.begin()) {}
 
-    virtual size_t getH() override
+    size_t getH()
     {
         return image->getH();
     }
 
-    virtual size_t getW() override
+    size_t getW()
     {
         return image->getW();
     }
 
-    virtual uint32_t getPixel(size_t x, size_t y) override
+    virtual uint32_t getPixel(size_t x, size_t y)
     {
         return image->getPixel(x, y);
     }
 
-    virtual void setPixel(size_t x, size_t y, uint32_t color) override
+    void setPixel(size_t x, size_t y, uint32_t color)
     {
         return image->setPixel(x, y, color);
     }
 
-    virtual booba::Picture getPicture(size_t x, size_t y, size_t w, size_t h) override
+    py::array_t<uint32_t> getPicture(size_t x, size_t y, size_t w, size_t h)
     {
-        return std::forward<booba::Picture>(image->getPicture(x, y, h, w));
+        auto pic = image->getPicture(x, y, w, h);
+        std::vector<long> shape;
+        shape.push_back(w);
+        shape.push_back(h);
+        py::array_t<uint32_t> arr(py::detail::any_container<long>(std::move(shape)), pic.takeData());
+        return arr;
     }
 
-    virtual void setPicture(booba::Picture &&pic) override
+    void setPicture(size_t x, size_t y, py::array_t<uint32_t> &&arr)
     {
-        image->setPicture(std::forward<booba::Picture>(pic));
+        assert(arr.ndim() == 2);
+        size_t w = arr.shape(0);
+        size_t h = arr.shape(1);
+        image->setPicture(booba::Picture(arr.mutable_data(), x, y, w, h));
     }
 
 private:
@@ -190,7 +200,9 @@ PYBIND11_EMBEDDED_MODULE(pyplug, m)
         .def("getH", &PyProxyImage::getH)
         .def("getW", &PyProxyImage::getW)
         .def("getPixel", &PyProxyImage::getPixel)
-        .def("setPixel", &PyProxyImage::setPixel);
+        .def("setPixel", &PyProxyImage::setPixel)
+        .def("getPicture", &PyProxyImage::getPicture)
+        .def("setPicture", &PyProxyImage::setPicture);
 
 
     py::class_<booba::ApplicationContext>(m, "ApplicationContext")

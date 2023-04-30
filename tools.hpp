@@ -55,7 +55,7 @@ namespace booba { // boot of outstanding best api
         MouseReleased  = 3, // Mouse released on image. Data structure: MouseButtonEventData
 
         ButtonClicked   = 4, // Button on toolbar was clicked. Data structure: ButtonClickedEventData.
-        SliderMoved     = 5, // Slider on toolbar was moved. Data structure: SliderMovedEventData.
+        SliderMoved  = 5, // Slider on toolbar was moved. Data structure: SliderMovedEventData.
         CanvasMPressed  = 6, // Same as MousePressed, but on canvas. Data structure - CanvasEventData.
         CanvasMReleased = 7, // Same as MouseReleased, but on canvas. Data structure - CanvasEventData.
         CanvasMMoved    = 8, // Same as MouseMoved, but on canvas. Data structure - CanvasEventData.
@@ -225,6 +225,9 @@ namespace booba { // boot of outstanding best api
 
         }
 
+        Picture(uint32_t *data, size_t x, size_t y, size_t w, size_t h, bool owning = true)
+            : x(x), y(y), w(w), h(h), data(data), owning(owning) {}
+
         Picture(size_t x, size_t y, size_t w, size_t h, Image *image)
             : x(x), y(y), w(w), h(h)
         {
@@ -254,7 +257,7 @@ namespace booba { // boot of outstanding best api
 
         void operator=(Picture &&other)
         {
-            if (data != nullptr)
+            if (data != nullptr and owning)
                 delete[] data;
 
             data = other.data;
@@ -270,7 +273,7 @@ namespace booba { // boot of outstanding best api
 
         ~Picture()
         {
-            if (data != nullptr)
+            if (data != nullptr and owning)
                 delete[] data;
 
             x = y = -1;
@@ -313,6 +316,17 @@ namespace booba { // boot of outstanding best api
             return data;
         }
 
+        uint32_t* takeData()
+        {
+            auto ret = data;
+
+            x = y = -1;
+            w = h = -1;
+            data = nullptr;
+
+            return ret;
+        }
+
         size_t getH() const
         {
             return h;
@@ -337,6 +351,7 @@ namespace booba { // boot of outstanding best api
         size_t x, y;
         size_t w, h;
         uint32_t *data = nullptr;
+        bool owning;
     };
 
 
