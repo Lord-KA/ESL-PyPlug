@@ -28,14 +28,13 @@ endif()
 FetchContent_Declare(
   commonTools
   GIT_REPOSITORY https://github.com/mishaglik/Elpidifor-s-legacy.git
-  GIT_TAG        v2.0.1
+  GIT_TAG        main
 )
 
 FetchContent_GetProperties(commonTools)
 if(NOT commonTools_POPULATED)
   FetchContent_Populate(commonTools)
-  #XXX temporary don't include ESL standard, because it is not updated yet
-  # include_directories(./build/_deps/commontools-src)
+    include_directories(./build/_deps/commontools-src)
 endif()
 
 # Define sources and executable

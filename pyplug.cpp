@@ -115,7 +115,7 @@ public:
                 y = event.Oleg.cedata.y;
                 break;
 
-            case ev::CanvasMLeft:
+            case ev::MouseLeft:
                 break;
 
             case ev::TimerEvent:
@@ -224,7 +224,7 @@ PYBIND11_EMBEDDED_MODULE(pyplug, m)
         .value("CanvasMPressed",  booba::EventType::CanvasMPressed)
         .value("CanvasMReleased", booba::EventType::CanvasMReleased)
         .value("CanvasMMoved",    booba::EventType::CanvasMMoved)
-        .value("CanvasMLeft",     booba::EventType::CanvasMLeft)
+        .value("MouseLeft",     booba::EventType::MouseLeft)
 
         .value("TimerEvent",      booba::EventType::TimerEvent);
 
