@@ -131,6 +131,8 @@ int main()
     booba::Event event;
     event.type = booba::EventType::MouseMoved;
 
+    std::cerr << "Texture: " << tools[0]->getTexture() << "\n";
+
     tools[0]->apply(&image, &event);
 
     for (size_t i = 0; i < 10e6; ++i)

@@ -153,9 +153,9 @@ public:
 
     virtual const char* getTexture()
     {
-        py::object res = pyTool.attr("getTexture")();
-        py::print(res);
-        return "some_texture.png";          //XXX fix string cast
+        py::str res = pyTool.attr("getTexture")();
+        texture = res;
+        return texture.c_str();
     }
 
     virtual void buildSetupWidget()
@@ -166,6 +166,7 @@ public:
 private:
 
     py::object pyTool;
+    std::string texture;
 };
 
 /*
