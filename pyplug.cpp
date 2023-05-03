@@ -48,7 +48,8 @@ public:
         std::vector<long> shape;
         shape.push_back(w);
         shape.push_back(h);
-        py::array_t<uint32_t> arr(py::detail::any_container<long>(std::move(shape)), pic.takeData());
+        shape.push_back(4);     // For RGBA format.
+        py::array_t<uint8_t> arr(py::detail::any_container<long>(std::move(shape)), (uint8_t *)pic.takeData());
         return arr;
     }
 
@@ -145,10 +146,12 @@ public:
 
     virtual void apply(booba::Image* image, const booba::Event* event)
     {
+        assert(image != nullptr && "PyPlug doesn't support nullptr being passed as apply argument");
+        assert(event != nullptr && "PyPlug doesn't support nullptr being passed as apply argument");
+
         PyProxyImage *proxyImage = new PyProxyImage(image);
         PyProxyEvent *proxyEvent = new PyProxyEvent(*event);
-        if (image and event)
-            pyTool.attr("apply")(proxyImage, proxyEvent);
+        pyTool.attr("apply")(proxyImage, proxyEvent);
     }
 
     virtual const char* getTexture()

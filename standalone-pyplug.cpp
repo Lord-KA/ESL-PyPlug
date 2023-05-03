@@ -150,6 +150,7 @@ int main()
 
     tools[0]->apply(&image, &event);
 
+    event.type = booba::EventType::ButtonClicked;
     tools[2]->apply(&image, &event);
 
     std::cerr << "Finished testing!\n";
