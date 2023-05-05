@@ -1,4 +1,5 @@
 #include "tools.hpp"
+#include <cstdint>
 #include <vector>
 
 #define STANDALONE_MODE
@@ -50,7 +51,7 @@ namespace booba {
         return x + y + w + h;
     }
 
-    void putPixel(uint64_t canvas, size_t x, size_t y, uint32_t color)
+    void putPixel(uint64_t canvas, size_t x, size_t y, booba::Color color)
     {
         //TODO
     }
@@ -60,7 +61,7 @@ namespace booba {
         //TODO
     }
 
-    void cleanCanvas(uint64_t canvasId, uint32_t color)
+    void cleanCanvas(uint64_t canvasId, booba::Color color)
     {
         //TODO
     }
@@ -81,12 +82,12 @@ public:
         return 20;
     }
 
-    virtual uint32_t getPixel(size_t x, size_t y) override
+    virtual booba::Color getPixel(size_t x, size_t y) override
     {
-        return x + y;
+        return booba::Color(static_cast<uint32_t>(x + y));
     }
 
-    virtual void setPixel(size_t x, size_t y, uint32_t color) override
+    virtual void setPixel(size_t x, size_t y, booba::Color color) override
     {
         assert(!"Not implemented yet!");
     }
@@ -98,8 +99,8 @@ public:
 
     virtual void setPicture(booba::Picture &&pic) override
     {
-        std::cerr << "pic(2, 5) = " << pic(2, 5) << "\n";
-        assert(pic(2, 5) == 179);
+        std::cerr << "pic(2, 5) = " << pic(2, 5).toInteger() << "\n";
+        assert(pic(2, 5).toInteger() == 179);
     }
 };
 

@@ -1,5 +1,3 @@
-#include <cstddef>
-#include <cstdint>
 #include <pybind11/stl.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
@@ -32,14 +30,14 @@ public:
         return image->getW();
     }
 
-    virtual uint32_t getPixel(size_t x, size_t y)
+    virtual booba::Color getPixel(size_t x, size_t y)
     {
         return image->getPixel(x, y);
     }
 
-    void setPixel(size_t x, size_t y, uint32_t color)
+    void setPixel(size_t x, size_t y, booba::Color c)
     {
-        return image->setPixel(x, y, color);
+        return image->setPixel(x, y, c);
     }
 
     py::array_t<uint32_t> getPicture(size_t x, size_t y, size_t w, size_t h)
@@ -53,12 +51,13 @@ public:
         return arr;
     }
 
-    void setPicture(size_t x, size_t y, py::array_t<uint32_t> &&arr)
+    void setPicture(size_t x, size_t y, py::array_t<uint8_t> &&arr)
     {
-        assert(arr.ndim() == 2);
+        assert(arr.ndim() == 3);
+        assert(arr.shape(2) == 4);
         size_t w = arr.shape(0);
         size_t h = arr.shape(1);
-        image->setPicture(booba::Picture(arr.mutable_data(), x, y, w, h));
+        image->setPicture(booba::Picture((booba::Color*)(arr.mutable_data()), x, y, w, h));
     }
 
 private:
@@ -262,6 +261,17 @@ PYBIND11_EMBEDDED_MODULE(pyplug, m)
         .def_readwrite("id", &PyProxyEvent::id)
         .def_readwrite("value", &PyProxyEvent::value)
         .def_readwrite("time", &PyProxyEvent::time);
+
+
+    py::class_<booba::Color>(m, "Color")
+        .def(py::init<uint32_t>())
+        .def("toInteger", &booba::Color::toInteger)
+        .def("_compare", &booba::Color::operator==)
+        .def_readwrite("r", &booba::Color::r)
+        .def_readwrite("g", &booba::Color::g)
+        .def_readwrite("b", &booba::Color::b)
+        .def_readwrite("a", &booba::Color::a);
+
 }
 
 } /* namespace detail */
