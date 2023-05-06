@@ -57,7 +57,7 @@ public:
         assert(arr.shape(2) == 4);
         size_t w = arr.shape(0);
         size_t h = arr.shape(1);
-        image->setPicture(booba::Picture((booba::Color*)(arr.mutable_data()), x, y, w, h));
+        image->setPicture(booba::Picture((booba::Color*)(arr.mutable_data()), x, y, w, h, false));
     }
 
 private:
