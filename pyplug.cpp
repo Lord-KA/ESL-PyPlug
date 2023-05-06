@@ -121,6 +121,11 @@ public:
             case ev::TimerEvent:
                 time = event.Oleg.tedata.time;
                 break;
+
+            case ev::TextEvent:
+                id = event.Oleg.textdata.id;
+                text = event.Oleg.textdata.text;
+                break;
         }
     }
 
@@ -134,6 +139,7 @@ public:
 
     uint64_t id;
     int64_t value;
+    const char *text;
 
     uint64_t time;
 };
@@ -182,6 +188,12 @@ PYBIND11_EMBEDDED_MODULE(pyplug, m)
     m.def("createLabel",  &booba::createLabel);
     m.def("createSlider", &booba::createSlider);
     m.def("createCanvas", &booba::createCanvas);
+    m.def("createEditor", &booba::createEditor);
+
+    m.def("setValueSlider", &booba::setValueSlider);
+
+    m.def("setTextEditor", &booba::setTextEditor);
+    m.def("getTextEditor", &booba::getTextEditor);
 
     m.def("putPixel",    &booba::putPixel);
     m.def("putSprite",   &booba::putSprite);
@@ -227,9 +239,10 @@ PYBIND11_EMBEDDED_MODULE(pyplug, m)
         .value("CanvasMPressed",  booba::EventType::CanvasMPressed)
         .value("CanvasMReleased", booba::EventType::CanvasMReleased)
         .value("CanvasMMoved",    booba::EventType::CanvasMMoved)
-        .value("MouseLeft",     booba::EventType::MouseLeft)
+        .value("MouseLeft",       booba::EventType::MouseLeft)
 
-        .value("TimerEvent",      booba::EventType::TimerEvent);
+        .value("TimerEvent",      booba::EventType::TimerEvent)
+        .value("TextEvent",       booba::EventType::TextEvent);
 
 
     py::class_<booba::MotionEventData>(m, "MotionEventData")

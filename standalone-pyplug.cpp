@@ -1,5 +1,6 @@
 #include "tools.hpp"
 #include <cstdint>
+#include <sys/types.h>
 #include <vector>
 
 #define STANDALONE_MODE
@@ -49,6 +50,26 @@ namespace booba {
     size_t createCanvas(size_t x, size_t y, size_t w, size_t h)
     {
         return x + y + w + h;
+    }
+
+    void setValueSlider(uint64_t sliderId, int64_t val)
+    {
+        //TODO
+    }
+
+    uint64_t createEditor(size_t x, size_t y, size_t w, size_t h)
+    {
+        return x * y + w * h;
+    }
+
+    void setTextEditor(uint64_t editorId, const char *text)
+    {
+        //TODO
+    }
+
+    char* getTextEditor(uint64_t editorId)
+    {
+        return (char*)editorId;
     }
 
     void putPixel(uint64_t canvas, size_t x, size_t y, booba::Color color)
