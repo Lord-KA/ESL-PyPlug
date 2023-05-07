@@ -5,7 +5,6 @@
 
 #include <iostream>
 #include <string>
-#include <sys/types.h>
 #include <utility>
 #include <vector>
 
@@ -60,8 +59,26 @@ public:
         image->setPicture(booba::Picture((booba::Color*)(arr.mutable_data()), x, y, w, h, false));
     }
 
+    PyProxyImage* getHiddenLayer()
+    {
+        auto layer = image->getHiddenLayer();
+        assert(layer != nullptr && "According to ESL, hidden layer is always non-NULL");
+        if (hiddenLayer == nullptr)
+            hiddenLayer = new PyProxyImage(layer);
+        else
+            hiddenLayer->image = layer;
+        return hiddenLayer;
+    }
+
+    ~PyProxyImage()
+    {
+        if (hiddenLayer)
+            delete hiddenLayer;
+    }
+
 private:
-    booba::Image *image;
+    booba::Image *image = nullptr;
+    PyProxyImage *hiddenLayer = nullptr;
 };
 
 
@@ -217,7 +234,8 @@ PYBIND11_EMBEDDED_MODULE(pyplug, m)
         .def("getPixel", &PyProxyImage::getPixel)
         .def("setPixel", &PyProxyImage::setPixel)
         .def("getPicture", &PyProxyImage::getPicture)
-        .def("setPicture", &PyProxyImage::setPicture);
+        .def("setPicture", &PyProxyImage::setPicture)
+        .def("getHiddenLayer", &PyProxyImage::getHiddenLayer);
 
 
     py::class_<booba::ApplicationContext>(m, "ApplicationContext")

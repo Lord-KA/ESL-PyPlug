@@ -123,6 +123,11 @@ public:
         std::cerr << "pic(2, 5) = " << pic(2, 5).toInteger() << "\n";
         assert(pic(2, 5).toInteger() == 179);
     }
+
+    virtual booba::Image* getHiddenLayer() override
+    {
+        return this;
+    }
 };
 
 
