@@ -138,6 +138,11 @@ public:
     {
         return this;
     }
+
+    virtual void clean(const booba::Color &c = booba::Color::WHITE) override
+    {
+        //TODO
+    }
 };
 
 

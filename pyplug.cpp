@@ -70,6 +70,11 @@ public:
         return hiddenLayer;
     }
 
+    void clean(const booba::Color c = booba::Color::WHITE)
+    {
+        image->clean(c);
+    }
+
     ~PyProxyImage()
     {
         if (hiddenLayer)
@@ -238,7 +243,8 @@ PYBIND11_EMBEDDED_MODULE(pyplug, m)
         .def("setPixel", &PyProxyImage::setPixel)
         .def("getPicture", &PyProxyImage::getPicture)
         .def("setPicture", &PyProxyImage::setPicture)
-        .def("getHiddenLayer", &PyProxyImage::getHiddenLayer);
+        .def("getHiddenLayer", &PyProxyImage::getHiddenLayer)
+        .def("clean", &PyProxyImage::clean);
 
 
     py::class_<booba::ApplicationContext>(m, "ApplicationContext")
