@@ -209,6 +209,9 @@ PYBIND11_EMBEDDED_MODULE(pyplug, m)
 
     m.def("setValueSlider", &booba::setValueSlider);
 
+    m.def("setTextLabel", &booba::setTextLabel);
+    m.def("getTextLabel", &booba::getTextLabel);
+
     m.def("setTextEditor", &booba::setTextEditor);
     m.def("getTextEditor", &booba::getTextEditor);
 

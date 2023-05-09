@@ -87,6 +87,16 @@ namespace booba {
         //TODO
     }
 
+    void setTextLabel(uint64_t labelId, const char *text)
+    {
+        //TODO
+    }
+
+    char* getTextLabel(uint64_t labelId)
+    {
+        return "This is some label";
+    }
+
     ApplicationContext *APPCONTEXT;
 }
 // ESL }}}
