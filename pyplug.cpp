@@ -43,8 +43,8 @@ public:
     {
         auto pic = image->getPicture(x, y, w, h);
         std::vector<long> shape;
-        shape.push_back(w);
         shape.push_back(h);
+        shape.push_back(w);
         shape.push_back(4);     // For RGBA format.
         py::array_t<uint8_t> arr(py::detail::any_container<long>(std::move(shape)), (uint8_t *)pic.takeData());
         return arr;
@@ -54,8 +54,8 @@ public:
     {
         assert(arr.ndim() == 3);
         assert(arr.shape(2) == 4);
-        size_t w = arr.shape(0);
-        size_t h = arr.shape(1);
+        size_t w = arr.shape(1);
+        size_t h = arr.shape(0);
         image->setPicture(booba::Picture((booba::Color*)(arr.mutable_data()), x, y, w, h, false));
     }
 
@@ -291,7 +291,8 @@ PYBIND11_EMBEDDED_MODULE(pyplug, m)
 
         .def_readwrite("id", &PyProxyEvent::id)
         .def_readwrite("value", &PyProxyEvent::value)
-        .def_readwrite("time", &PyProxyEvent::time);
+        .def_readwrite("time", &PyProxyEvent::time)
+        .def_readwrite("text", &PyProxyEvent::text);
 
 
     py::class_<booba::Color>(m, "Color")
