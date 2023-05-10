@@ -1,3 +1,4 @@
+#include <exception>
 #include <pybind11/stl.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
@@ -7,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <filesystem>
 
 #include "tools.hpp"
 
@@ -317,13 +319,38 @@ PYBIND11_EMBEDDED_MODULE(pyplug, m)
 
 } /* namespace detail */
 
+
 void booba::init_module()
 {
 #ifndef STANDALONE_MODE
     py::initialize_interpreter();
 
-    py::module_ plug = py::module_::import("my_plugin");
-    py::object res = plug.attr("init_module")();
+    std::string dir = "../PythonPlugins/";
+    std::cerr << "Searching for py-plugins in: " << dir << std::endl;
+
+    if (not std::filesystem::directory_entry(dir).exists()) {
+        std::cerr << "WARNING: no py-plugin folder (should be \"" << dir << "\", relative to executable)\n";
+        return;
+    }
+
+    py::module_ sys = py::module_::import("sys");
+    sys.attr("path").attr("append")(dir);
+
+    for (auto file : std::filesystem::directory_iterator(dir)) {
+        if (file.is_directory() or not file.path().string().ends_with(".py"))
+            continue;
+
+        std::string name = file.path();
+        std::cerr << "Found py-plugin: " << name << std::endl;
+        name = name.substr(name.find_last_of("/") + 1);
+        name = name.substr(0, name.find(".py"));
+        try {
+            py::module_ plug = py::module_::import(name.c_str());
+            py::object res = plug.attr("init_module")();
+        } catch(const std::exception &exc) {
+            std::cerr << "WARINIG: Unable to open plugin: " << name << " (error: " << exc.what() << ")\n";
+        }
+    }
 #else
     std::cerr << "DEBUG: init_module is skipped in STANDALONE_MODE.\n";
 #endif
