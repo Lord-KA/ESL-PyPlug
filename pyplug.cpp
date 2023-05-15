@@ -168,7 +168,6 @@ public:
     uint64_t time;
 };
 
-
 class PyProxyTool : public booba::Tool {
 public:
     PyProxyTool(py::object tool) : pyTool(tool) {}
@@ -180,22 +179,35 @@ public:
 
         PyProxyImage *proxyImage = new PyProxyImage(image);
         PyProxyEvent *proxyEvent = new PyProxyEvent(*event);
-        pyTool.attr("apply")(proxyImage, proxyEvent);
+        call("apply", proxyImage, proxyEvent);
     }
 
     virtual const char* getTexture()
     {
-        py::str res = pyTool.attr("getTexture")();
-        texture = res;
+        py::str res = call("getTexture");
+        if (res == py::str(py::none()))
+            texture = "\0";
+        else
+            texture = res;
         return texture.c_str();
     }
 
     virtual void buildSetupWidget()
     {
-        pyTool.attr("buildSetupWidget")();
+        call("buildSetupWidget");
     }
 
 private:
+    template<typename ...Args>
+    py::object call(const char *func, Args... args)
+    {
+        try {
+            return pyTool.attr(func)(args...);
+        } catch(const std::exception &exc) {
+            std::cerr << "ERROR: PyPlug tool function " << func << " failed: " << exc.what() << std::endl;
+            return py::str(py::none());
+        }
+    }
 
     py::object pyTool;
     std::string texture;
