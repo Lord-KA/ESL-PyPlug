@@ -4,6 +4,9 @@ ESL standard python adapter
 This lib can be added to Plugins directory of your [ESL c++ standard Photoshop](https://github.com/mishaglik/Elpidifor-s-legacy) application
 to provide a way to use python-written plugins.
 
+
+![This is a plug-in with ML-based algorithm that modifies picture with an according style](https://github.com/Lord-KA/ESL-PyPlug/assets/43700614/ffa735d3-faf2-4384-98b5-8c93abf79cc6)
+
 ## Building
 ```sh
 mkdir build
